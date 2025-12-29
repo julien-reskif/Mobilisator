@@ -8,9 +8,9 @@ const MIN_NGRAMS = 2;
 const NB_NGRAMS = 45;
 
 const outputDirectoryPath =
-	"/Users/julien.zolli/Developer/perso/static-search/public/cities";
+	"./public/cities";
 const inputPath =
-	"/Users/julien.zolli/Developer/perso/static-search/communes.json";
+	"./communes.json";
 const inputFile = Bun.file(inputPath);
 
 interface Indexable {
