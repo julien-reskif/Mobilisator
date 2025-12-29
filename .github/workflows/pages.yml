@@ -2,19 +2,32 @@ name: Deploy Pages
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Debug - list public
+        run: |
+          ls -la public
+          find public -maxdepth 2 -type f | sed -n '1,200p'
+
+      - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: public
+
       - uses: actions/deploy-pages@v4
