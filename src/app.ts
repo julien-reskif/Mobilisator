@@ -1,6 +1,20 @@
 import type { City, CitySearchResult, TourData } from "./dtos/city";
 import { normalizeText } from "./utils";
 
+// Get the base path for assets (handles GitHub Pages subdirectory deployment)
+const getBasePath = (): string => {
+	const path = window.location.pathname;
+	// If we're at /OEP/ or /OEP/something, base is /OEP/
+	// If we're at / or /something, base is /
+	const match = path.match(/^(\/[^/]+\/)/);
+	if (match && match[1] !== "/") {
+		return match[1];
+	}
+	return "/";
+};
+
+const BASE_PATH = getBasePath();
+
 // Router and app state
 let searchTimeout: number | null = null;
 
@@ -25,7 +39,7 @@ async function loadSearchPartition(
 	if (searchIndexCache[partition]) {
 		return searchIndexCache[partition];
 	}
-	const response = await fetch(`cities/search-${partition}.json`);
+	const response = await fetch(`${BASE_PATH}cities/search-${partition}.json`);
 	if (!response.ok) {
 		throw new Error(`Failed to load search partition ${partition}`);
 	}
@@ -39,7 +53,7 @@ async function loadCitiesData(): Promise<Record<number, City>> {
 	if (citiesDataCache) {
 		return citiesDataCache;
 	}
-	const response = await fetch("cities/cities-data.json");
+	const response = await fetch(`${BASE_PATH}cities/cities-data.json`);
 	if (!response.ok) {
 		throw new Error("Failed to load cities data");
 	}
@@ -52,7 +66,7 @@ async function loadSlugMap(): Promise<Record<string, number>> {
 	if (slugMapCache) {
 		return slugMapCache;
 	}
-	const response = await fetch("cities/slug-map.json");
+	const response = await fetch(`${BASE_PATH}cities/slug-map.json`);
 	if (!response.ok) {
 		throw new Error("Failed to load slug map");
 	}
@@ -105,12 +119,16 @@ function init(): void {
 // Handle routing based on current URL
 async function handleRoute(): Promise<void> {
 	const path = window.location.pathname;
+	// Remove base path to get the relative path
+	const relativePath = path.startsWith(BASE_PATH)
+		? path.slice(BASE_PATH.length)
+		: path.substring(1);
 
-	if (path === "/" || path === "/index.html") {
+	if (relativePath === "" || relativePath === "index.html") {
 		showSearchView();
 	} else {
-		// Extract slug from path (e.g., /76100-rouen -> 76100-rouen)
-		const slug = path.substring(1).replace(".html", "");
+		// Extract slug from path (e.g., 76100-rouen)
+		const slug = relativePath.replace(".html", "");
 		await loadCityBySlug(slug);
 	}
 }
@@ -137,7 +155,7 @@ function showCityView(): void {
 
 // Go back to search
 function goBack(): void {
-	window.history.pushState({}, "", "/");
+	window.history.pushState({}, "", BASE_PATH);
 	showSearchView();
 }
 
@@ -235,7 +253,7 @@ async function navigateToCityById(id: number): Promise<void> {
 	// First load the city to get its slug
 	const city = await fetchCityById(id);
 	if (city?.slug) {
-		window.history.pushState({}, "", `/${city.slug}`);
+		window.history.pushState({}, "", `${BASE_PATH}${city.slug}`);
 		displayCityDetail(city);
 		showCityView();
 	}

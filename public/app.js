@@ -2,6 +2,15 @@
 var normalizeText = (text) => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/[''`]/g, "-").replace(/[^a-z0-9]+/g, "-").replace(/\s+/g, "-").trim();
 
 // src/app.ts
+var getBasePath = () => {
+  const path = window.location.pathname;
+  const match = path.match(/^(\/[^/]+\/)/);
+  if (match && match[1] !== "/") {
+    return match[1];
+  }
+  return "/";
+};
+var BASE_PATH = getBasePath();
 var searchTimeout = null;
 var searchIndexCache = {};
 var citiesDataCache = null;
@@ -17,7 +26,7 @@ async function loadSearchPartition(partition) {
   if (searchIndexCache[partition]) {
     return searchIndexCache[partition];
   }
-  const response = await fetch(`cities/search-${partition}.json`);
+  const response = await fetch(`${BASE_PATH}cities/search-${partition}.json`);
   if (!response.ok) {
     throw new Error(`Failed to load search partition ${partition}`);
   }
@@ -29,7 +38,7 @@ async function loadCitiesData() {
   if (citiesDataCache) {
     return citiesDataCache;
   }
-  const response = await fetch("cities/cities-data.json");
+  const response = await fetch(`${BASE_PATH}cities/cities-data.json`);
   if (!response.ok) {
     throw new Error("Failed to load cities data");
   }
@@ -40,7 +49,7 @@ async function loadSlugMap() {
   if (slugMapCache) {
     return slugMapCache;
   }
-  const response = await fetch("cities/slug-map.json");
+  const response = await fetch(`${BASE_PATH}cities/slug-map.json`);
   if (!response.ok) {
     throw new Error("Failed to load slug map");
   }
@@ -75,10 +84,11 @@ function init() {
 }
 async function handleRoute() {
   const path = window.location.pathname;
-  if (path === "/" || path === "/index.html") {
+  const relativePath = path.startsWith(BASE_PATH) ? path.slice(BASE_PATH.length) : path.substring(1);
+  if (relativePath === "" || relativePath === "index.html") {
     showSearchView();
   } else {
-    const slug = path.substring(1).replace(".html", "");
+    const slug = relativePath.replace(".html", "");
     await loadCityBySlug(slug);
   }
 }
@@ -102,7 +112,7 @@ function showCityView() {
     cityView.classList.remove("hidden");
 }
 function goBack() {
-  window.history.pushState({}, "", "/");
+  window.history.pushState({}, "", BASE_PATH);
   showSearchView();
 }
 async function searchCities() {
@@ -174,7 +184,7 @@ function displaySearchResults(cities) {
 async function navigateToCityById(id) {
   const city = await fetchCityById(id);
   if (city?.slug) {
-    window.history.pushState({}, "", `/${city.slug}`);
+    window.history.pushState({}, "", `${BASE_PATH}${city.slug}`);
     displayCityDetail(city);
     showCityView();
   }
