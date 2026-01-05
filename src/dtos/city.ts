@@ -90,6 +90,10 @@ export interface AnalyseData {
 	"tour décisif": number;
 	majeurs: number;
 	"Non votants de 18-24": number;
+	"Pop 18-24": number;
+	"Pop 18+": number;
+	"Non votants": number;
+	"Part ne votant pas": number;
 }
 
 export interface City {
@@ -98,6 +102,7 @@ export interface City {
 	nom_standard: string;
 	code_postal: string;
 	code_departement: string;
+	code_insee: string;
 	libelle_departement: string;
 	code_commune: string;
 	"Tour 1": TourData;

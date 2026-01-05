@@ -208,18 +208,61 @@ function displayCityDetail(city) {
     return;
   }
   const votesDecisifs = city.Analyse["Votes décisifs"];
-  const nonVotants1824 = Math.round(city.Analyse["Non votants de 18-24"]);
+  const tourDecisif = city.Analyse["tour décisif"];
   const hasSecondTour = !!city["Tour 2"];
+  const tourData = hasSecondTour ? city["Tour 2"] : city["Tour 1"];
+  const resultats = tourData.resultats;
+  const sortedResultats = [...resultats].sort((a, b) => b.Voix - a.Voix);
+  const first = sortedResultats[0];
+  const second = sortedResultats[1];
+  let explanationDecisive = "";
+  if (tourDecisif === 1 && !hasSecondTour) {
+    explanationDecisive = `Si ${votesDecisifs.toLocaleString("fr-FR")} personnes supplémentaires avaient voté pour une autre liste que ${first.Liste}, menée par ${first.Prénom} ${first.Nom}, elle aurait perdu la majorité absolue des votes exprimés et un second tour aurait eu lieu.`;
+  } else {
+    explanationDecisive = `Si ${votesDecisifs.toLocaleString("fr-FR")} personnes supplémentaires avaient voté pour ${second.Liste}, menée par ${second.Prénom} ${second.Nom} (${second.Voix.toLocaleString("fr-FR")} votes), elle serait passée devant ${first.Liste} menée par ${first.Prénom} ${first.Nom} (${first.Voix.toLocaleString("fr-FR")} votes).`;
+  }
+  const deptCode = city.code_departement.padStart(3, "0");
+  const electionSource = `https://www.archives-resultats-elections.interieur.gouv.fr/resultats/municipales-2020/${deptCode}/${city.code_insee}.php`;
+  const pop1824 = city.Analyse["Pop 18-24"];
+  const pop18Plus = city.Analyse["Pop 18+"];
+  const nonVotants = city.Analyse["Non votants"];
+  const partNeVotantPas = city.Analyse["Part ne votant pas"];
+  const explanationNonVoting = `${city.nom_standard} compte ${pop1824.toLocaleString("fr-FR")} jeunes de 18 à 24 ans et en moyenne ${(partNeVotantPas * 100).toFixed(1)}% de la population majeure n'a pas voté à ${city.nom_standard} (${nonVotants.toLocaleString("fr-FR")} non votants / ${pop18Plus.toLocaleString("fr-FR")} majeur·es).`;
+  const nonVotingSource = "https://explore.data.gouv.fr/fr/datasets/6627b6fd7291f9d8a62d9997/#/resources/b8ad4a63-a4e3-4ef2-af6e-b08ef3b8084d";
   const mainTagline = hasSecondTour ? "votes suffisaient<br>pour élire un autre maire" : "votes suffisaient<br>pour aller au second tour";
+  const nonVotants1824 = Math.round(city.Analyse["Non votants de 18-24"]);
   const html = `
         <div class="city-detail">
-            <div class="main-stat">
-                <div class="main-number">${votesDecisifs.toLocaleString("fr-FR")}</div>
-                <div class="main-label">${mainTagline}</div>
-            </div>
+
+			<!-- Main Stat: Decisive Votes -->
+			<div class="main-stat">
+				<div class="main-number">${votesDecisifs.toLocaleString("fr-FR")}</div>
+				<div class="main-label">${mainTagline}</div>
+			</div>
+
+            <!-- Secondary Stat: Non-Voting Youth -->
             <div class="secondary-stat">
                 <div class="secondary-number">${nonVotants1824.toLocaleString("fr-FR")}</div>
                 <div class="secondary-label">jeunes de 18-24 ans<br>n'ont pas voté</div>
+            </div>
+
+            <!-- CTA Button -->
+            <div class="cta-section">
+                <a href="https://www.service-public.fr/particuliers/vosdroits/R16396" target="_blank" class="cta-button">
+                    POUR 2026,<br>INSCRIS TOI EN 1 MINUTE<span class="emoji">\uD83D\uDD25</span>
+                </a>
+            </div>
+
+            <!-- Explanation: Decisive Votes -->
+            <div class="explanation-section">
+                <p class="explanation-text">${explanationDecisive}</p>
+                <a href="${electionSource}" target="_blank" class="source-link">${electionSource}</a>
+            </div>
+
+            <!-- Explanation: Non-Voting -->
+            <div class="explanation-section white">
+                <p class="explanation-text">${explanationNonVoting}</p>
+                <a href="${nonVotingSource}" target="_blank" class="source-link">${nonVotingSource}</a>
             </div>
         </div>
     `;
