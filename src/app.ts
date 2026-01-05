@@ -85,7 +85,7 @@ function debounce(func: () => void, delay: number): () => void {
 }
 
 // Initialize the app
-function init(): void {
+function initApp(): void {
 	// Handle initial route
 	handleRoute();
 
@@ -346,11 +346,16 @@ function displayCityDetail(city: City): void {
                 <div class="secondary-label">jeunes de 18-24 ans<br>n'ont pas voté</div>
             </div>
 
-            <!-- CTA Button -->
+            <!-- CTA Buttons -->
             <div class="cta-section">
                 <a href="https://www.service-public.fr/particuliers/vosdroits/R16396" target="_blank" class="cta-button">
                     POUR 2026,<br>INSCRIS TOI EN 1 MINUTE<span class="emoji">🔥</span>
                 </a>
+            </div>
+            <div class="cta-section">
+                <button type="button" class="cta-button" onclick="openQomonModal()">
+                    REJOINS LE MOUVEMENT<span class="emoji">✊</span>
+                </button>
             </div>
 
             <!-- Explanation: Decisive Votes -->
@@ -370,18 +375,60 @@ function displayCityDetail(city: City): void {
 	cityDetailDiv.innerHTML = html;
 }
 
-// Make navigateToCityById available globally for onclick handlers
+// Open the Qomon modal
+function openQomonModal(): void {
+	// Create modal if it doesn't exist
+	let modal = document.getElementById("qomonModal");
+	if (!modal) {
+		modal = document.createElement("div");
+		modal.id = "qomonModal";
+		modal.className = "modal";
+		modal.innerHTML = `
+			<div class="modal-content">
+				<button type="button" class="modal-close" onclick="closeQomonModal()">&times;</button>
+				<div class="qomon-form" data-base_id="103323d7-738d-4ff2-813b-c397d6980e38"></div>
+			</div>
+		`;
+		document.body.appendChild(modal);
+
+		// Trigger Qomon form initialization
+		const qomonForm = modal.querySelector(".qomon-form");
+		if (qomonForm) {
+			const clone = qomonForm.cloneNode(true);
+			qomonForm.parentNode?.replaceChild(clone, qomonForm);
+		}
+	}
+
+	modal.classList.add("show");
+	document.body.style.overflow = "hidden";
+}
+
+// Close the Qomon modal
+function closeQomonModal(): void {
+	const modal = document.getElementById("qomonModal");
+	if (modal) {
+		modal.classList.remove("show");
+		document.body.style.overflow = "";
+	}
+}
+
+// Make functions available globally for onclick handlers
 declare global {
 	interface Window {
 		navigateToCityById: (id: number) => Promise<void>;
+		openQomonModal: () => void;
+		closeQomonModal: () => void;
+		init?: () => void; // Qomon setup.js global init function
 	}
 }
 
 window.navigateToCityById = navigateToCityById;
+window.openQomonModal = openQomonModal;
+window.closeQomonModal = closeQomonModal;
 
 // Initialize when DOM is ready
 if (document.readyState === "loading") {
-	document.addEventListener("DOMContentLoaded", init);
+	document.addEventListener("DOMContentLoaded", initApp);
 } else {
-	init();
+	initApp();
 }

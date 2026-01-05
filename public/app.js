@@ -64,7 +64,7 @@ function debounce(func, delay) {
     searchTimeout = window.setTimeout(() => func(), delay);
   };
 }
-function init() {
+function initApp() {
   handleRoute();
   window.addEventListener("popstate", handleRoute);
   const searchInput = document.getElementById("searchInput");
@@ -246,11 +246,16 @@ function displayCityDetail(city) {
                 <div class="secondary-label">jeunes de 18-24 ans<br>n'ont pas voté</div>
             </div>
 
-            <!-- CTA Button -->
+            <!-- CTA Buttons -->
             <div class="cta-section">
                 <a href="https://www.service-public.fr/particuliers/vosdroits/R16396" target="_blank" class="cta-button">
                     POUR 2026,<br>INSCRIS TOI EN 1 MINUTE<span class="emoji">\uD83D\uDD25</span>
                 </a>
+            </div>
+            <div class="cta-section">
+                <button type="button" class="cta-button" onclick="openQomonModal()">
+                    REJOINS LE MOUVEMENT<span class="emoji">✊</span>
+                </button>
             </div>
 
             <!-- Explanation: Decisive Votes -->
@@ -268,9 +273,40 @@ function displayCityDetail(city) {
     `;
   cityDetailDiv.innerHTML = html;
 }
+function openQomonModal() {
+  let modal = document.getElementById("qomonModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "qomonModal";
+    modal.className = "modal";
+    modal.innerHTML = `
+			<div class="modal-content">
+				<button type="button" class="modal-close" onclick="closeQomonModal()">&times;</button>
+				<div class="qomon-form" data-base_id="103323d7-738d-4ff2-813b-c397d6980e38"></div>
+			</div>
+		`;
+    document.body.appendChild(modal);
+    const qomonForm = modal.querySelector(".qomon-form");
+    if (qomonForm) {
+      const clone = qomonForm.cloneNode(true);
+      qomonForm.parentNode?.replaceChild(clone, qomonForm);
+    }
+  }
+  modal.classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+function closeQomonModal() {
+  const modal = document.getElementById("qomonModal");
+  if (modal) {
+    modal.classList.remove("show");
+    document.body.style.overflow = "";
+  }
+}
 window.navigateToCityById = navigateToCityById;
+window.openQomonModal = openQomonModal;
+window.closeQomonModal = closeQomonModal;
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", initApp);
 } else {
-  init();
+  initApp();
 }
