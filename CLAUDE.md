@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OEP (On Est Prêt) is a French electoral data visualization application. It allows users to search for French cities and view detailed election results, population demographics, and voting analysis data. The app is a single-page application (SPA) with a static file server, designed for GitHub Pages deployment.
+Mobilisator is a French electoral data visualization application (formerly OEP - On Est Prêt). It allows users to search for French cities and view detailed election results, population demographics, and voting analysis data. The app is a single-page application (SPA) with a static file server, designed for GitHub Pages deployment.
 
 ## Commands
 

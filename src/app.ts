@@ -4,7 +4,7 @@ import { normalizeText } from "./utils";
 // Get the base path for assets (handles GitHub Pages subdirectory deployment)
 const getBasePath = (): string => {
 	const path = window.location.pathname;
-	// If we're at /OEP/ or /OEP/something, base is /OEP/
+	// If we're at /Mobilisator/ or /Mobilisator/something, base is /Mobilisator/
 	// If we're at / or /something, base is /
 	const match = path.match(/^(\/[^/]+\/)/);
 	if (match && match[1] !== "/") {
