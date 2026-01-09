@@ -1,6 +1,103 @@
 import type { City, CitySearchResult } from "./dtos/city";
 import { normalizeText } from "./utils";
 
+// Access code configuration
+const ACCESS_CODE = "OEP";
+const ACCESS_STORAGE_KEY = "mobilisator_access_granted";
+
+// Check if access has been granted
+function hasAccess(): boolean {
+	return localStorage.getItem(ACCESS_STORAGE_KEY) === "true";
+}
+
+// Grant access and hide the gate
+function grantAccess(): void {
+	localStorage.setItem(ACCESS_STORAGE_KEY, "true");
+	hideAccessGate();
+}
+
+// Show the access gate overlay
+function showAccessGate(): void {
+	const gate = document.getElementById("accessGate");
+	const mainContent = document.getElementById("mainContent");
+	if (gate) gate.classList.add("show");
+	if (mainContent) mainContent.classList.add("hidden");
+}
+
+// Hide the access gate and show main content
+function hideAccessGate(): void {
+	const gate = document.getElementById("accessGate");
+	const mainContent = document.getElementById("mainContent");
+	if (gate) gate.classList.remove("show");
+	if (mainContent) mainContent.classList.remove("hidden");
+
+	// Initialize the rest of the app after access is granted
+	handleRoute();
+	window.addEventListener("popstate", handleRoute);
+
+	// Set up search input handlers
+	const searchInput = document.getElementById("searchInput") as HTMLInputElement;
+	if (searchInput) {
+		searchInput.addEventListener("focus", () => {
+			searchInput.value = "";
+			clearResults();
+		});
+
+		searchInput.addEventListener(
+			"input",
+			debounce(() => {
+				searchCities();
+			}, 80),
+		);
+
+		searchInput.addEventListener("keypress", (e: KeyboardEvent) => {
+			if (e.key === "Enter") {
+				if (searchTimeout !== null) {
+					clearTimeout(searchTimeout);
+				}
+				searchCities();
+			}
+		});
+	}
+}
+
+// Validate the access code
+function validateAccessCode(): void {
+	const input = document.getElementById("accessCodeInput") as HTMLInputElement;
+	const error = document.getElementById("accessError");
+	if (!input) return;
+
+	const code = input.value.trim().toUpperCase();
+	if (code === ACCESS_CODE) {
+		grantAccess();
+	} else {
+		if (error) {
+			error.textContent = "Code incorrect";
+			error.style.display = "block";
+		}
+		input.value = "";
+		input.focus();
+	}
+}
+
+// Initialize access gate
+function initAccessGate(): void {
+	const input = document.getElementById("accessCodeInput") as HTMLInputElement;
+	const button = document.getElementById("accessCodeSubmit");
+
+	if (input) {
+		input.addEventListener("keypress", (e: KeyboardEvent) => {
+			if (e.key === "Enter") {
+				validateAccessCode();
+			}
+		});
+	}
+
+	if (button) {
+		button.addEventListener("click", validateAccessCode);
+	}
+}
+
 // Get the base path for assets (handles GitHub Pages subdirectory deployment)
 const getBasePath = (): string => {
 	const path = window.location.pathname;
@@ -86,6 +183,15 @@ function debounce(func: () => void, delay: number): () => void {
 
 // Initialize the app
 function initApp(): void {
+	// Initialize access gate handlers
+	initAccessGate();
+
+	// Check if access is granted
+	if (!hasAccess()) {
+		showAccessGate();
+		return;
+	}
+
 	// Handle initial route
 	handleRoute();
 

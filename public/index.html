@@ -261,6 +261,79 @@
             display: none;
         }
 
+        /* Access Gate Styles */
+        .access-gate {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .access-gate.show {
+            display: flex;
+        }
+
+        .access-gate-title {
+            font-size: 36px;
+            font-weight: 900;
+            color: #5ECBA1;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .access-gate-input {
+            background: #1a1a1a;
+            border: 2px solid #5ECBA1;
+            border-radius: 10px;
+            padding: 15px 25px;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            color: #fff;
+            text-align: center;
+            width: 200px;
+            outline: none;
+        }
+
+        .access-gate-input:focus {
+            border-color: #7EDBB5;
+        }
+
+        .access-gate-input::placeholder {
+            color: #666;
+        }
+
+        .access-gate-button {
+            margin-top: 20px;
+            background: #5ECBA1;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 40px;
+            font-family: 'Anton', Impact, sans-serif;
+            font-size: 20px;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .access-gate-button:hover {
+            background: #7EDBB5;
+        }
+
+        .access-error {
+            display: none;
+            color: #ff6b6b;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -308,22 +381,33 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <h1>#RIENSANSNOUS</h1>
-    </nav>
+    <!-- Access Gate -->
+    <div id="accessGate" class="access-gate">
+        <h2 class="access-gate-title">Entrez le code d'accès</h2>
+        <input type="text" id="accessCodeInput" class="access-gate-input" placeholder="Code" autocomplete="off">
+        <button type="button" id="accessCodeSubmit" class="access-gate-button">Valider</button>
+        <p id="accessError" class="access-error"></p>
+    </div>
 
-    <div class="container">
-        <p class="subtitle">Aux municipales de 2020,</p>
+    <!-- Main Content -->
+    <div id="mainContent">
+        <nav class="navbar">
+            <h1>#RIENSANSNOUS</h1>
+        </nav>
 
-        <div class="search-box">
-            <div class="search-input-wrapper">
-                <span class="search-prefix">À:</span>
-                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher une ville...">
+        <div class="container">
+            <p class="subtitle">Aux municipales de 2020,</p>
+
+            <div class="search-box">
+                <div class="search-input-wrapper">
+                    <span class="search-prefix">À:</span>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Rechercher une ville...">
+                </div>
+                <div id="results" class="results"></div>
             </div>
-            <div id="results" class="results"></div>
-        </div>
 
-        <div id="cityDetail"></div>
+            <div id="cityDetail"></div>
+        </div>
     </div>
 
     <script src="https://scripts.qomon.org/forms/v1/setup.js"></script>

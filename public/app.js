@@ -2,6 +2,82 @@
 var normalizeText = (text) => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/[''`]/g, "-").replace(/[^a-z0-9]+/g, "-").replace(/\s+/g, "-").trim();
 
 // src/app.ts
+var ACCESS_CODE = "OEP";
+var ACCESS_STORAGE_KEY = "mobilisator_access_granted";
+function hasAccess() {
+  return localStorage.getItem(ACCESS_STORAGE_KEY) === "true";
+}
+function grantAccess() {
+  localStorage.setItem(ACCESS_STORAGE_KEY, "true");
+  hideAccessGate();
+}
+function showAccessGate() {
+  const gate = document.getElementById("accessGate");
+  const mainContent = document.getElementById("mainContent");
+  if (gate)
+    gate.classList.add("show");
+  if (mainContent)
+    mainContent.classList.add("hidden");
+}
+function hideAccessGate() {
+  const gate = document.getElementById("accessGate");
+  const mainContent = document.getElementById("mainContent");
+  if (gate)
+    gate.classList.remove("show");
+  if (mainContent)
+    mainContent.classList.remove("hidden");
+  handleRoute();
+  window.addEventListener("popstate", handleRoute);
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("focus", () => {
+      searchInput.value = "";
+      clearResults();
+    });
+    searchInput.addEventListener("input", debounce(() => {
+      searchCities();
+    }, 80));
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        if (searchTimeout !== null) {
+          clearTimeout(searchTimeout);
+        }
+        searchCities();
+      }
+    });
+  }
+}
+function validateAccessCode() {
+  const input = document.getElementById("accessCodeInput");
+  const error = document.getElementById("accessError");
+  if (!input)
+    return;
+  const code = input.value.trim().toUpperCase();
+  if (code === ACCESS_CODE) {
+    grantAccess();
+  } else {
+    if (error) {
+      error.textContent = "Code incorrect";
+      error.style.display = "block";
+    }
+    input.value = "";
+    input.focus();
+  }
+}
+function initAccessGate() {
+  const input = document.getElementById("accessCodeInput");
+  const button = document.getElementById("accessCodeSubmit");
+  if (input) {
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        validateAccessCode();
+      }
+    });
+  }
+  if (button) {
+    button.addEventListener("click", validateAccessCode);
+  }
+}
 var getBasePath = () => {
   const path = window.location.pathname;
   const match = path.match(/^(\/[^/]+\/)/);
@@ -65,6 +141,11 @@ function debounce(func, delay) {
   };
 }
 function initApp() {
+  initAccessGate();
+  if (!hasAccess()) {
+    showAccessGate();
+    return;
+  }
   handleRoute();
   window.addEventListener("popstate", handleRoute);
   const searchInput = document.getElementById("searchInput");
